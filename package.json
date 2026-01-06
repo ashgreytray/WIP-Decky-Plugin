@@ -1,7 +1,7 @@
 {
-  "name": "decky-plugin-template",
+  "name": "Rollerino",
   "version": "0.0.1",
-  "description": "A template to quickly create decky plugins from scratch, based on TypeScript and webpack",
+  "description": "Controller to PC adaptor",
   "type": "module",
   "scripts": {
     "build": "rollup -c",
@@ -10,16 +10,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SteamDeckHomebrew/decky-plugin-template.git"
+    "url": "git+https://github.com/ashgreytray/WIP-Decky-Plugin.git"
   },
   "keywords": [
     "decky",
     "plugin",
-    "plugin-template",
+    "Controller",
     "steam-deck",
     "deck"
   ],
-  "author": "You <you@you.tld>",
+  "author": "Ash531",
   "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/SteamDeckHomebrew/decky-plugin-template/issues"
