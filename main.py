@@ -5,10 +5,66 @@ import os
 # and add the `decky-loader/plugin/imports` path to `python.analysis.extraPaths` in `.vscode/settings.json`
 import decky
 import asyncio
+from decky_plugin import Plugin
+import threading
+import time
+import socket
+import struct
+
+IIO_BASE = "/sys/bus/iio/devices/iio:device0"
+
+class Plugin(Plugin):
+    def _main(self):
+        self.running = False
+        self.thread = None
+        self.log.info("Gyro Decky plugin loaded")
+
+    # rpc from frontendd
+    async def start_stream(self, ip: str, port: int):
+        if self.running:
+            return
+
+        self.running = True
+        self.thread = threading.Thread(
+            target=self._gyro_loop,
+            args=(ip, port),
+            daemon=True
+        )
+        self.thread.start()
+        self.log.info("Gyro stream started")
+
+    async def stop_stream(self):
+        self.running = False
+        self.log.info("Gyro stream stopped")
+
+    # lloop
+    def _gyro_loop(self, ip, port):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        while self.running:
+            gx, gy, gz = self._read_gyro()
+            payload = struct.pack("fff", gx, gy, gz)
+            sock.sendto(payload, (ip, port))
+            time.sleep(0.004)  # ~250 Hz
+
+    # reads imu
+    def _read_gyro(self):
+        with open(f"{IIO_BASE}/in_anglvel_x_raw") as fx, \
+             open(f"{IIO_BASE}/in_anglvel_y_raw") as fy, \
+             open(f"{IIO_BASE}/in_anglvel_z_raw") as fz, \
+             open(f"{IIO_BASE}/in_anglvel_scale") as fs:
+
+            scale = float(fs.read().strip())
+            gx = int(fx.read()) * scale
+            gy = int(fy.read()) * scale
+            gz = int(fz.read()) * scale
+
+            return gx, gy, gz
+
 
 class Plugin:
     # A normal method. It can be called from the TypeScript side using @decky/api.
-    async def add(self, left: int, right: int) -> int:
+    async def add(
         return left + right
 
     async def long_running(self):
